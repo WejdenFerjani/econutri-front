@@ -1,0 +1,324 @@
+{% extends "base_admin.html.twig" %}
+
+{% block title %}Commandes - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-success font-weight-bold">🛒 Gestion des Commandes</h1>
+            <p class="text-muted mb-0">Consultez et gérez toutes les commandes de vos clients</p>
+        </div>
+        <span class="badge bg-success fs-5 px-3 py-2">{{ orders|length }} commande(s)</span>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-left-success shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Commandes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ orders|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-success opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-success shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Revenu Total
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% set totalRevenue = 0 %}
+                                {% for order in orders %}
+                                    {% for item in order.orderItems %}
+                                        {% set totalRevenue = totalRevenue + ((item.product.price / 1000) * item.quantity) %}
+                                    {% endfor %}
+                                {% endfor %}
+                                {{ totalRevenue|number_format(2, '.', ' ') }} TND
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-success opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-success shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Articles Vendus
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% set totalItems = 0 %}
+                                {% for order in orders %}
+                                    {% for item in order.orderItems %}
+                                        {% set totalItems = totalItems + item.quantity %}
+                                    {% endfor %}
+                                {% endfor %}
+                                {{ totalItems }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-box fa-2x text-success opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-success shadow-sm h-100">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Panier Moyen
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {% if orders|length > 0 %}
+                                    {{ (totalRevenue / orders|length)|number_format(2, '.', ' ') }} TND
+                                {% else %}
+                                    0.00 TND
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-success opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des commandes -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-gradient-success text-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold"><i class="fas fa-list"></i> Liste complète des commandes</h6>
+                <small>{{ orders|length }} résultat(s)</small>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if orders|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" style="font-size: 0.9rem;">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="text-center" style="width: 60px;">#ID</th>
+                            <th style="width: 200px;">Client</th>
+                            <th style="width: 100px;">Produits</th>
+                            <th class="text-end" style="width: 130px;">Total</th>
+                            <th style="width: 150px;">Date</th>
+                            <th class="text-center" style="width: 100px;">Statut</th>
+                            <th class="text-center" style="width: 100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td class="text-center"><strong class="text-success">#{{ order.id }}</strong></td>
+                            <td>
+                                {% if order.user %}
+                                    <div>
+                                        <strong>{{ order.user.prenom }} {{ order.user.nom }}</strong>
+                                    </div>
+                                    <small class="text-muted">{{ order.user.email }}</small>
+                                {% else %}
+                                    <span class="badge bg-secondary">Client supprimé</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-info text-white">
+                                    <i class="fas fa-box"></i> {{ order.orderItems|length }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <strong class="text-success" style="font-size: 1.05rem;">
+                                    {% set total = 0 %}
+                                    {% for item in order.orderItems %}
+                                        {% set total = total + ((item.product.price / 1000) * item.quantity) %}
+                                    {% endfor %}
+                                    {{ total|number_format(2, '.', ' ') }} TND
+                                </strong>
+                            </td>
+                            <td>
+                                <i class="far fa-calendar-alt text-muted"></i> {{ order.createdAt|date('d/m/Y') }}
+                                <br>
+                                <small class="text-muted"><i class="far fa-clock"></i> {{ order.createdAt|date('H:i') }}</small>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success px-3 py-2">
+                                    <i class="fas fa-check-circle"></i> Confirmée
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#detailsModal-{{ order.id }}" title="Voir les détails">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Modals pour les détails des commandes -->
+            {% for order in orders %}
+            <div class="modal fade" id="detailsModal-{{ order.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title">Détails de la commande #{{ order.id }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <h6 class="text-success font-weight-bold">Informations client</h6>
+                                    {% if order.user %}
+                                        <p class="mb-2">
+                                            <strong>Nom:</strong> {{ order.user.prenom }} {{ order.user.nom }}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Email:</strong> {{ order.user.email }}
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Téléphone:</strong> {{ order.user.telephone ?? 'Non fourni' }}
+                                        </p>
+                                    {% else %}
+                                        <p class="text-muted">Client supprimé</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-success font-weight-bold">Informations commande</h6>
+                                    <p class="mb-2">
+                                        <strong>ID:</strong> {{ order.id }}
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Date:</strong> {{ order.createdAt|date('d/m/Y H:i') }}
+                                    </p>
+                                    <p class="mb-2">
+                                        <strong>Statut:</strong> <span class="badge bg-success">✓ Confirmée</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <h6 class="text-success font-weight-bold mb-3">Produits commandés</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Produit</th>
+                                            <th>Quantité</th>
+                                            <th>Prix (TND)</th>
+                                            <th>Sous-total (TND)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% set grandTotal = 0 %}
+                                        {% for item in order.orderItems %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ item.product.name }}</strong>
+                                                {% if item.product.category %}
+                                                    <br><small class="text-muted">{{ item.product.category.name }}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td><strong>{{ item.quantity }}</strong></td>
+                                            <td>{{ (item.product.price / 1000)|number_format(2, '.', ' ') }} TND</td>
+                                            <td>
+                                                <strong class="text-success">
+                                                    {% set subTotal = (item.product.price / 1000) * item.quantity %}
+                                                    {% set grandTotal = grandTotal + subTotal %}
+                                                    {{ subTotal|number_format(2, '.', ' ') }} TND
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="border-top pt-3 text-end">
+                                <h5 class="text-success">
+                                    <strong>Total: {{ grandTotal|number_format(2, '.', ' ') }} TND</strong>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart fa-4x text-success mb-3 opacity-50"></i>
+                <h5 class="text-muted">Aucune commande pour le moment</h5>
+                <p class="text-muted mb-0">Les commandes de vos clients apparaîtront ici</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-left-success {
+        border-left: 0.25rem solid #28a745 !important;
+    }
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    }
+    .text-success {
+        color: #28a745 !important;
+    }
+    .btn-info {
+        background-color: #17a2b8;
+    }
+    .btn-info:hover {
+        background-color: #138496;
+    }
+    .opacity-50 {
+        opacity: 0.5;
+    }
+    .table thead th {
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: #6c757d;
+        padding: 12px;
+    }
+    .table tbody td {
+        padding: 15px 12px;
+        vertical-align: middle;
+    }
+    .table tbody tr:hover {
+        background-color: rgba(40, 167, 69, 0.05);
+    }
+    .shadow-sm {
+        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
+    }
+</style>
+{% endblock %}

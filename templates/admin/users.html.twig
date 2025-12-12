@@ -1,0 +1,187 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block title %}Gestion des Utilisateurs - Econutri{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div>
+        <h1>Gestion des Utilisateurs</h1>
+        <div class="subtitle">Gérer tous les utilisateurs de la plateforme</div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Liste des Utilisateurs</h5>
+        <div class="search-box" style="width: 300px;">
+            <input type="text" class="form-control" id="searchUsers" placeholder="Rechercher un utilisateur...">
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 user-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Email</th>
+                        <th>Téléphone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set userCount = 0 %}
+                    {% for user in users %}
+                        {% if 'ROLE_ADMIN' not in user.roles %}
+                            {% set userCount = userCount + 1 %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.nom }}</td>
+                                <td>{{ user.prenom }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.telephone ?? 'N/A' }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-info" title="Voir détails">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-warning" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    {% if userCount == 0 %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                Aucun utilisateur trouvé
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="text-muted">
+                Total: {{ userCount ?? 0 }} utilisateur(s)
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.search-box input {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 8px 16px;
+}
+
+.table-responsive {
+    border-top: 1px solid #e5e7eb;
+}
+
+.table th {
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #495057;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.user-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.user-table thead th {
+    background: linear-gradient(135deg, #ecfdf3, #e3f5eb);
+    color: #166534;
+    border-bottom: 2px solid #c5e7d1;
+}
+
+.user-table tbody tr:nth-child(odd) {
+    background-color: #f9fafb;
+}
+
+.user-table tbody tr {
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.user-table tbody tr:hover {
+    background-color: #f8fff4;
+    transform: translateY(-1px);
+}
+
+.user-table td:first-child {
+    font-weight: 600;
+    color: #14532d;
+}
+
+.user-table td {
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.btn-outline-info, .btn-outline-warning, .btn-outline-danger {
+    border-width: 1.5px;
+}
+
+.btn-outline-info:hover {
+    background: #e0f2fe;
+}
+
+.btn-outline-warning:hover {
+    background: #fff7ed;
+}
+
+.btn-outline-danger:hover {
+    background: #fef2f2;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchUsers');
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

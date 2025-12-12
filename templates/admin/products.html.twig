@@ -1,0 +1,433 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block title %}Gestion des Produits - Econutri{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div>
+        <h1>Gestion des Produits</h1>
+        <div class="subtitle">Gérer le catalogue de produits</div>
+    </div>
+    <div>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
+            <i class="fas fa-plus"></i> Ajouter un produit
+        </button>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Liste des Produits</h5>
+        <div class="search-box" style="width: 300px;">
+            <input type="text" class="form-control" id="searchProducts" placeholder="Rechercher un produit...">
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Image</th>
+                        <th>Nom</th>
+                        <th>Catégorie</th>
+                        <th>Stock</th>
+                        <th>Prix</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.id }}</td>
+                        <td>
+                            <img src="{{ asset('images/' ~ product.image) }}" 
+                                 alt="{{ product.name }}" 
+                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                        </td>
+                        <td>
+                            <strong>{{ product.name }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ product.category.name }}</span>
+                        </td>
+                        <td>
+                            {% if product.stock < 10 %}
+                                <span class="badge bg-danger">{{ product.stock }}</span>
+                            {% elseif product.stock < 50 %}
+                                <span class="badge bg-warning">{{ product.stock }}</span>
+                            {% else %}
+                                <span class="badge bg-success">{{ product.stock }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ product.price }} TND</strong>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-info" title="Voir détails"
+                                        onclick="viewProduct({{ product.id }}, '{{ product.name }}', '{{ product.description }}', {{ product.price }}, {{ product.stock }}, '{{ product.category.name }}', '{{ product.image }}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-warning" title="Modifier"
+                                        onclick="editProduct({{ product.id }}, '{{ product.name }}', '{{ product.description }}', {{ product.price }}, {{ product.stock }}, '{{ product.category.name }}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-danger" title="Supprimer" 
+                                        onclick="deleteProduct({{ product.id }}, '{{ product.name }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            Aucun produit trouvé
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="text-muted">
+                Total: {{ products|length }} produit(s)
+            </div>
+            <div class="text-muted">
+                Stock total: {{ products|reduce((carry, product) => carry + product.stock, 0) }} unités
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.search-box input {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 8px 16px;
+}
+
+.table th {
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #495057;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.subtitle {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchProducts');
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+
+// Voir les détails d'un produit
+function viewProduct(id, name, description, price, stock, category, image) {
+    document.getElementById('viewProductName').textContent = name;
+    document.getElementById('viewProductDescription').textContent = description;
+    document.getElementById('viewProductPrice').textContent = price + ' TND';
+    document.getElementById('viewProductStock').textContent = stock;
+    document.getElementById('viewProductCategory').textContent = category;
+    document.getElementById('viewProductImage').src = '{{ asset("images/") }}' + image;
+    
+    const modal = new bootstrap.Modal(document.getElementById('viewProductModal'));
+    modal.show();
+}
+
+// Modifier un produit
+function editProduct(id, name, description, price, stock, category) {
+    document.getElementById('editProductId').value = id;
+    document.getElementById('editProductName').value = name;
+    document.getElementById('editProductDescription').value = description;
+    document.getElementById('editProductPrice').value = price;
+    document.getElementById('editProductStock').value = stock;
+    document.getElementById('editProductCategory').value = category;
+    
+    const modal = new bootstrap.Modal(document.getElementById('editProductModal'));
+    modal.show();
+}
+
+// Sauvegarder les modifications
+function saveProductChanges() {
+    const productId = document.getElementById('editProductId').value;
+    const productName = document.getElementById('editProductName').value;
+    const productDescription = document.getElementById('editProductDescription').value;
+    const productPrice = document.getElementById('editProductPrice').value;
+    const productStock = document.getElementById('editProductStock').value;
+    
+    if (!productName || !productDescription || !productPrice || productStock === '') {
+        alert('Veuillez remplir tous les champs');
+        return;
+    }
+    
+    fetch('{{ path("admin_update_product") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            productId: productId,
+            name: productName,
+            description: productDescription,
+            price: productPrice,
+            stock: productStock
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Produit modifié avec succès');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editProductModal'));
+            modal.hide();
+            location.reload();
+        } else {
+            alert('Erreur: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue');
+    });
+}
+
+// Supprimer un produit
+function deleteProduct(productId, productName) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer "${productName}" ? Cette action ne peut pas être annulée.`)) {
+        fetch('{{ path("admin_delete_product") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                productId: productId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Produit supprimé avec succès');
+                location.reload();
+            } else {
+                alert('Erreur: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Une erreur est survenue');
+        });
+    }
+}
+</script>
+
+<!-- Modal pour ajouter un produit -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel">Ajouter un produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="addProductImage" class="form-label">Image du produit</label>
+                        <input type="file" class="form-control" id="addProductImage" name="image" accept="image/*" required>
+                        <div class="form-text">Formats acceptés: JPG, PNG, WEBP</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addProductName" class="form-label">Nom *</label>
+                        <input type="text" class="form-control" id="addProductName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addProductDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="addProductDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addProductCategory" class="form-label">Catégorie *</label>
+                        <select class="form-select" id="addProductCategory" name="category_id" required>
+                            <option value="">Sélectionner une catégorie</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="addProductStock" class="form-label">Stock *</label>
+                            <input type="number" class="form-control" id="addProductStock" name="stock" min="0" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="addProductPrice" class="form-label">Prix (TND) *</label>
+                            <input type="number" class="form-control" id="addProductPrice" name="price" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="addProductOrigin" class="form-label">Origine</label>
+                            <input type="text" class="form-control" id="addProductOrigin" name="origin" value="Tunisie">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="addProductUnit" class="form-label">Unité</label>
+                            <select class="form-select" id="addProductUnit" name="unit">
+                                <option value="kg">kg</option>
+                                <option value="pièce">pièce</option>
+                                <option value="litre">litre</option>
+                                <option value="botte">botte</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="submitNewProduct()">Ajouter le produit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function submitNewProduct() {
+    const form = document.getElementById('addProductForm');
+    const formData = new FormData(form);
+    
+    // Validation
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    fetch('{{ path("admin_add_product") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Produit ajouté avec succès!');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addProductModal'));
+            modal.hide();
+            form.reset();
+            location.reload();
+        } else {
+            alert('Erreur: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue lors de l\'ajout du produit');
+    });
+}
+</script>
+
+<!-- Modal pour voir les détails -->
+<div class="modal fade" id="viewProductModal" tabindex="-1" aria-labelledby="viewProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewProductModalLabel">Détails du produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <img id="viewProductImage" src="" alt="Produit" style="width: 100%; border-radius: 8px;">
+                    </div>
+                    <div class="col-md-8">
+                        <h4 id="viewProductName"></h4>
+                        <p><strong>Description:</strong> <span id="viewProductDescription"></span></p>
+                        <p><strong>Catégorie:</strong> <span id="viewProductCategory"></span></p>
+                        <p><strong>Prix:</strong> <span id="viewProductPrice" class="text-success fw-bold"></span></p>
+                        <p><strong>Stock:</strong> <span id="viewProductStock" class="badge bg-info"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour modifier -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProductModalLabel">Modifier le produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProductForm">
+                    <input type="hidden" id="editProductId">
+                    <div class="mb-3">
+                        <label for="editProductName" class="form-label">Nom</label>
+                        <input type="text" class="form-control" id="editProductName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editProductDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductPrice" class="form-label">Prix (TND)</label>
+                        <input type="number" class="form-control" id="editProductPrice" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductStock" class="form-label">Stock</label>
+                        <input type="number" class="form-control" id="editProductStock" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductCategory" class="form-label">Catégorie</label>
+                        <input type="text" class="form-control" id="editProductCategory" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="saveProductChanges()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 20px auto; 
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header { 
+            background: linear-gradient(135deg, #4CAF50, #45a049); 
+            color: white; 
+            padding: 30px; 
+            text-align: center; 
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content { 
+            padding: 30px; 
+        }
+        .welcome-text {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .credentials { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 8px; 
+            border-left: 4px solid #4CAF50;
+            margin: 20px 0;
+        }
+        .info-box {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Bienvenue sur Econutri !</h1>
+            <p>Votre inscription a été confirmée avec succès</p>
+        </div>
+        
+        <div class="content">
+            <div class="welcome-text">
+                <p>Bonjour <strong>{{ user.prenom }} {{ user.nom }}</strong>,</p>
+                <p>Nous sommes ravis de vous accueillir dans notre communauté dédiée à une alimentation saine et bio !</p>
+            </div>
+
+            <div class="credentials">
+                <h3 style="color: #4CAF50; margin-top: 0;">📋 Vos informations de compte :</h3>
+                <p><strong>📧 Email :</strong> {{ user.email }}</p>
+                <p><strong>🔑 Mot de passe :</strong> {{ plainPassword }}</p>
+                <p><strong>📞 Téléphone :</strong> {{ user.telephone ?? 'Non renseigné' }}</p>
+                <p><strong>🎯 Objectif :</strong> 
+                    {% if user.objectif == 'bien_etre' %}Bien-être
+                    {% elseif user.objectif == 'perte_poids' %}Perte de poids
+                    {% elseif user.objectif == 'gain_poids' %}Gain de poids  
+                    {% elseif user.objectif == 'maintien' %}Maintien
+                    {% else %}Non spécifié
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="info-box">
+                <h4 style="color: #2E7D32; margin-top: 0;"> Ce que vous pouvez faire maintenant :</h4>
+                <ul>
+                    <li>🛒 Découvrir nos produits bio frais</li>
+                    <li>📱 Personnaliser votre profil santé</li>
+                    <li>💡 Recevoir des conseils nutritionnels personnalisés</li>
+                    <li>📞 Contacter notre service client pour toute question</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin: 25px 0;">
+                <a href="http://localhost:8000/login" style="display: inline-block; background: #4CAF50; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                    Se connecter à mon compte
+                </a>
+            </div>
+
+            <div class="footer">
+                <p><strong>L'équipe Econutri</strong></p>
+                <p>Votre marché bio de confiance</p>
+                <p>📧 contact@econutri.com • 📞 12 456 456</p>
+                <p style="font-size: 12px; color: #888;">
+                    Cet email a été envoyé automatiquement, merci de ne pas y répondre.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

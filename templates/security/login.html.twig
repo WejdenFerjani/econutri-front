@@ -1,0 +1,339 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion - Econutri{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* CSS COMPLET POUR LOGIN */
+        html, body {
+            margin: 0;
+            padding: 0;
+            /* Use same background as registration page */
+            background-image: url('{{ asset('images/back.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            width: 100%;
+            height: 100%;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .login-container {
+            min-height: 100vh;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .login-header::before {
+            display: block;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px auto;
+        }
+
+        .login-header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 300;
+        }
+
+        .login-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .login-body {
+            padding: 40px;
+        }
+
+        /* Styles des champs de formulaire */
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4CAF50;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-control:hover {
+            border-color: #cbd5e0;
+        }
+
+        /* Bouton de connexion */
+        .btn-login {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-login:active {
+            transform: translateY(-1px);
+        }
+
+        /* Liens */
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #718096;
+        }
+
+        .register-link a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .register-link a:hover {
+            color: #45a049;
+            text-decoration: underline;
+        }
+
+        /* Messages d'erreur */
+        .alert {
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+            border: none;
+            padding: 15px 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .btn-close {
+            padding: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+        /* Animation de chargement */
+        .btn-login.loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn-login.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-right-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Flash messages */
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 10px;
+            }
+            
+            .login-body {
+                padding: 30px 20px;
+            }
+            
+            .login-header {
+                padding: 20px;
+            }
+            
+            .login-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .form-control {
+                padding: 12px 15px;
+            }
+            
+            .btn-login {
+                padding: 15px 30px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<!-- Flash messages -->
+<div class="flash-messages">
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Succès !</strong> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+    
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Erreur !</strong> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+</div>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h1>Content de vous revoir</h1>
+            <p>Connectez-vous à votre compte</p>
+        </div>
+        
+        <div class="login-body">
+            <form method="post" class="login-form">
+                {% if error %}
+                    <div class="alert alert-danger">
+                        <strong>Erreur !</strong> {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="inputEmail" class="form-label">Email</label>
+                    <input 
+                        type="email" 
+                        value="{{ last_username }}" 
+                        name="_username"  {# ← CORRECTION ICI #}
+                        id="inputEmail" 
+                        class="form-control" 
+                        placeholder="votre@email.com"
+                        autocomplete="email" 
+                        required 
+                        autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="inputPassword" class="form-label">Mot de passe</label>
+                    <input 
+                        type="password" 
+                        name="_password"  {# ← CORRECTION ICI #}
+                        id="inputPassword" 
+                        class="form-control" 
+                        placeholder="Votre mot de passe"
+                        autocomplete="current-password" 
+                        required>
+                </div>
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                <button type="submit" class="btn-login">
+                    Se connecter
+                </button>
+            </form>
+            
+            <div class="register-link">
+                <p>Pas encore de compte ? <a href="{{ path('app_register') }}">Inscrivez-vous ici</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Animation du bouton
+document.querySelector('.login-form').addEventListener('submit', function() {
+    const btn = document.querySelector('.btn-login');
+    btn.classList.add('loading');
+    btn.disabled = true;
+    btn.innerHTML = 'Connexion...';
+});
+</script>
+{% endblock %}

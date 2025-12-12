@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Confirmation de commande - Econutri</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9fafb;
+            color: #374151;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            padding: 32px 24px;
+            text-align: center;
+            color: white;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+        .content {
+            padding: 32px 24px;
+        }
+        .greeting {
+            margin-bottom: 24px;
+            font-size: 16px;
+        }
+        .greeting strong {
+            color: #4CAF50;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #d1d5db;
+            padding-bottom: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        th {
+            background-color: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .price-right {
+            text-align: right;
+        }
+        .summary {
+            background-color: #f9fafb;
+            padding: 16px;
+            border-radius: 6px;
+            margin-top: 16px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 15px;
+        }
+        .summary-row total {
+            border-top: 2px solid #d1d5db;
+            padding-top: 12px;
+            margin-top: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #2E7D32;
+        }
+        .address-box {
+            background-color: #e8f5e8;
+            padding: 16px;
+            border-left: 4px solid #4CAF50;
+            border-radius: 4px;
+            margin-top: 16px;
+        }
+        .address-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2E7D32;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .address-content {
+            font-size: 14px;
+            color: #374151;
+            line-height: 1.8;
+        }
+        .footer {
+            background-color: #f3f4f6;
+            padding: 24px;
+            text-align: center;
+            font-size: 13px;
+            color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+        }
+        .footer strong {
+            color: #4CAF50;
+            display: block;
+            margin-top: 8px;
+        }
+        .divider {
+            height: 1px;
+            background-color: #e5e7eb;
+            margin: 24px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🌱 Econutri</h1>
+            <p>Confirmation de commande</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Bonjour <strong>{{ user.prenom }}</strong>,
+            </div>
+            
+            <p>Merci de votre confiance ! Votre commande a été reçue avec succès et est en cours de traitement.</p>
+
+            <!-- Produits -->
+            <div class="section-title">📦 Détails de votre commande</div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produit</th>
+                        <th class="price-right">Quantité</th>
+                        <th class="price-right">Prix Unitaire</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.orderItems %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td class="price-right">{{ item.quantity }} x</td>
+                            <td class="price-right">{{ item.unitPrice }} TND</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Résumé -->
+            <div class="summary">
+                <div class="summary-row">
+                    <span>Sous-total:</span>
+                    <span><strong>{{ order.totalAmount }} TND</strong></span>
+                </div>
+                <div class="summary-row">
+                    <span>Frais de livraison:</span>
+                    <span><strong>{{ order.shippingCost }} TND</strong></span>
+                </div>
+                <div class="summary-row total">
+                    <span>Montant total:</span>
+                    <span>{{ (order.totalAmount + order.shippingCost)|number_format(2, ',', ' ') }} TND</span>
+                </div>
+            </div>
+
+            <!-- Adresse de livraison -->
+            <div class="address-box">
+                <div class="address-label">📍 Adresse de livraison</div>
+                <div class="address-content">
+                    {{ order.shippingAddress }}<br>
+                    {{ order.shippingCity }}, {{ order.shippingZipCode }}
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <p style="font-size: 14px; color: #6b7280;">
+                Vous recevrez une notification lorsque votre commande sera expédiée. Si vous avez des questions, n'hésitez pas à nous contacter.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Merci d'avoir choisi Econutri
+            <strong>L'équipe Econutri</strong>
+            <p style="margin-top: 12px; font-size: 12px;">
+                © 2025 Econutri. Tous droits réservés.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

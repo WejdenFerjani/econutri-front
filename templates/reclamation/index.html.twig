@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}EcoNutri - Réclamation{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="{{ asset('styles/reclamation.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="reclamation-page">
+    <!-- Hero Section -->
+    <section class="reclamation-hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Service Réclamation</h1>
+                <p class="hero-subtitle">
+                    Votre satisfaction est notre priorité. Faites-nous part de vos préoccupations<br>
+                    et nous ferons de notre mieux pour y répondre rapidement.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Réclamation Section -->
+    <section id="reclamation-form" class="reclamation-section">
+        <div class="container">
+            <div class="reclamation-container">
+                <div class="reclamation-header">
+                    <h2>Formulaire de Réclamation</h2>
+                    <p>Remplissez ce formulaire pour nous faire part de votre réclamation</p>
+                </div>
+
+                <div class="reclamation-content">
+                    <div class="form-info">
+                        <div class="info-card">
+                            <i class="fas fa-info-circle"></i>
+                            <h4>Informations Importantes</h4>
+                            <ul>
+                                <li>Nous traitons toutes les réclamations dans les 48 heures</li>
+                                <li>Une réponse vous sera envoyée par email</li>
+                                <li>Vos informations sont traitées de manière confidentielle</li>
+                                <li>Pour les urgences, contactez-nous par téléphone</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="contact-info">
+                            <div class="contact-card">
+                                <i class="fas fa-phone"></i>
+                                <h5>Contact Urgent</h5>
+                                <p>+216 12 345 678</p>
+                                <small>Lun - Ven: 8h - 18h</small>
+                            </div>
+                            <div class="contact-card">
+                                <i class="fas fa-envelope"></i>
+                                <h5>Email</h5>
+                                <p>ecofood678@gmail.com</p>
+                                <small>Réponse sous 24h</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-container">
+                        {{ form_start(form, {'attr': {'class': 'reclamation-form', 'id': 'reclamation-form'}}) }}
+                            <div class="form-header">
+                                <i class="fas fa-comment-dots"></i>
+                                <h3>Détails de la Réclamation</h3>
+                            </div>
+                            
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    {{ form_label(form.nom) }}
+                                    {{ form_widget(form.nom) }}
+                                    <div class="form-error">
+                                        {{ form_errors(form.nom) }}
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    {{ form_label(form.email) }}
+                                    {{ form_widget(form.email) }}
+                                    <div class="form-error">
+                                        {{ form_errors(form.email) }}
+                                    </div>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    {{ form_label(form.sujet) }}
+                                    {{ form_widget(form.sujet) }}
+                                    <div class="form-error">
+                                        {{ form_errors(form.sujet) }}
+                                    </div>
+                                </div>
+
+                                <div class="form-group full-width">
+                                    {{ form_label(form.message) }}
+                                    {{ form_widget(form.message) }}
+                                    <div class="form-error">
+                                        {{ form_errors(form.message) }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-submit">
+                                <i class="fas fa-paper-plane"></i>
+                                Envoyer la Réclamation
+                            </button>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

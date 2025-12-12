@@ -1,0 +1,43 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block title %}Profil Admin - Econutri{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div>
+        <h1>Profil Administrateur</h1>
+        <div class="subtitle">Vos informations de connexion</div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Détails du compte</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Nom</label>
+                <div class="form-control bg-light">{{ app.user.nom ?? 'Admin' }}</div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Prénom</label>
+                <div class="form-control bg-light">{{ app.user.prenom ?? '' }}</div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Email</label>
+                <div class="form-control bg-light">{{ app.user.email }}</div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Rôle</label>
+                <div class="form-control bg-light">Administrateur</div>
+            </div>
+        </div>
+        <div class="alert alert-info mb-0">
+            Pour mettre à jour votre mot de passe, utilisez la commande console ou implémentez un flux de changement de mot de passe sécurisé.
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,340 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block title %}Gestion des Réclamations - Econutri{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div>
+        <h1>Gestion des Réclamations</h1>
+        <div class="subtitle">Gérer toutes les réclamations des utilisateurs</div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Liste des Réclamations</h5>
+        <div class="search-box" style="width: 300px;">
+            <input type="text" class="form-control" id="searchReclamations" placeholder="Rechercher une réclamation...">
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 reclamations-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Email</th>
+                        <th>Sujet</th>
+                        <th>Message</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reclamation in reclamations %}
+                    <tr>
+                        <td>{{ reclamation.id }}</td>
+                        <td>{{ reclamation.nom }}</td>
+                        <td>{{ reclamation.email }}</td>
+                        <td>{{ reclamation.sujet }}</td>
+                        <td>
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{ reclamation.message }}">
+                                {{ reclamation.message }}
+                            </span>
+                        </td>
+                        <td>{{ reclamation.dateCreation|date('d/m/Y H:i') }}</td>
+                        <td>
+                            {% if reclamation.statut == 'nouveau' %}
+                                <span class="badge bg-success">Nouveau</span>
+                            {% elseif reclamation.statut == 'en_cours' %}
+                                <span class="badge bg-warning">En cours</span>
+                            {% elseif reclamation.statut == 'resolu' %}
+                                <span class="badge bg-secondary">Résolu</span>
+                            {% else %}
+                                <span class="badge bg-info">{{ reclamation.statut }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-success" 
+                                        title="Répondre" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#replyModal"
+                                        data-reclamation-id="{{ reclamation.id }}"
+                                        data-reclamation-email="{{ reclamation.email }}"
+                                        data-reclamation-nom="{{ reclamation.nom }}"
+                                        data-reclamation-sujet="{{ reclamation.sujet }}">
+                                    <i class="fas fa-reply"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-info"
+                                        title="Voir détails"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#viewModal"
+                                        data-reclamation-id="{{ reclamation.id }}"
+                                        data-reclamation-email="{{ reclamation.email }}"
+                                        data-reclamation-nom="{{ reclamation.nom }}"
+                                        data-reclamation-sujet="{{ reclamation.sujet }}"
+                                        data-reclamation-message="{{ reclamation.message }}"
+                                        data-reclamation-date="{{ reclamation.dateCreation|date('d/m/Y H:i') }}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-outline-danger" title="Supprimer">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            Aucune réclamation trouvée
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="text-muted">
+                Total: {{ reclamations|length }} réclamation(s)
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-header {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.search-box input {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 8px 16px;
+}
+
+.table-responsive {
+    border-top: 1px solid #e5e7eb;
+}
+
+.table th {
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #495057;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.reclamations-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.reclamations-table thead th {
+    background: linear-gradient(135deg, #ecfdf3, #e3f5eb);
+    color: #166534;
+    border-bottom: 2px solid #c5e7d1;
+}
+
+.reclamations-table tbody tr:nth-child(odd) {
+    background-color: #f9fafb;
+}
+
+.reclamations-table tbody tr {
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.reclamations-table tbody tr:hover {
+    background-color: #f8fff4;
+    transform: translateY(-1px);
+}
+
+.reclamations-table td:first-child {
+    font-weight: 600;
+    color: #14532d;
+}
+
+.reclamations-table td {
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.btn-outline-info, .btn-outline-warning, .btn-outline-danger {
+    border-width: 1.5px;
+}
+
+.btn-outline-info:hover {
+    background: #e0f2fe;
+}
+
+.btn-outline-warning:hover {
+    background: #fff7ed;
+}
+
+.btn-outline-danger:hover {
+    background: #fef2f2;
+}
+
+.badge {
+    padding: 0.35em 0.65em;
+    font-weight: 600;
+}
+</style>
+
+<!-- Modal de réponse -->
+<div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #ecfdf3, #e3f5eb); border-bottom: 2px solid #c5e7d1;">
+                <h5 class="modal-title" id="replyModalLabel" style="color: #166534; font-weight: 600;">
+                    <i class="fas fa-reply"></i> Répondre à la réclamation
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="replyForm" method="POST" action="{{ path('admin_reply_reclamation') }}">
+                <div class="modal-body">
+                    <input type="hidden" id="reclamationId" name="reclamationId">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email du client</label>
+                        <input type="email" class="form-control" id="clientEmail" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nom du client</label>
+                        <input type="text" class="form-control" id="clientName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Sujet de la réclamation</label>
+                        <input type="text" class="form-control" id="originalSubject" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="replySubject" class="form-label fw-bold">Sujet de la réponse <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="replySubject" name="subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="replyMessage" class="form-label fw-bold">Message de réponse <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="replyMessage" name="message" rows="6" required placeholder="Écrivez votre réponse ici..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-paper-plane"></i> Envoyer la réponse
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de visualisation complète -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #ecfdf3, #e3f5eb); border-bottom: 2px solid #c5e7d1;">
+                <h5 class="modal-title" id="viewModalLabel" style="color: #166534; font-weight: 600;">
+                    <i class="fas fa-envelope-open"></i> Détails de la réclamation
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Nom</label>
+                        <div class="form-control bg-light" id="viewNom"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Email</label>
+                        <div class="form-control bg-light" id="viewEmail"></div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Sujet</label>
+                        <div class="form-control bg-light" id="viewSujet"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Date</label>
+                        <div class="form-control bg-light" id="viewDate"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Message</label>
+                    <div class="form-control" style="min-height: 180px; white-space: pre-wrap;" id="viewMessage"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+}</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchReclamations');
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        
+        tableRows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+    
+    // Gérer l'ouverture du modal de réponse
+    const replyModal = document.getElementById('replyModal');
+    replyModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const reclamationId = button.getAttribute('data-reclamation-id');
+        const email = button.getAttribute('data-reclamation-email');
+        const nom = button.getAttribute('data-reclamation-nom');
+        const sujet = button.getAttribute('data-reclamation-sujet');
+        
+        document.getElementById('reclamationId').value = reclamationId;
+        document.getElementById('clientEmail').value = email;
+        document.getElementById('clientName').value = nom;
+        document.getElementById('originalSubject').value = sujet;
+        document.getElementById('replySubject').value = 'Re: ' + sujet;
+    });
+
+    // Gérer l'ouverture du modal de visualisation
+    const viewModal = document.getElementById('viewModal');
+    viewModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        document.getElementById('viewNom').textContent = button.getAttribute('data-reclamation-nom');
+        document.getElementById('viewEmail').textContent = button.getAttribute('data-reclamation-email');
+        document.getElementById('viewSujet').textContent = button.getAttribute('data-reclamation-sujet');
+        document.getElementById('viewDate').textContent = button.getAttribute('data-reclamation-date');
+        document.getElementById('viewMessage').textContent = button.getAttribute('data-reclamation-message');
+    });
+});
+</script>
+{% endblock %}

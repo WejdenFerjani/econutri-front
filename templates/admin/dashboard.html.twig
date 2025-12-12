@@ -1,0 +1,522 @@
+{% extends 'base_admin.html.twig' %}
+
+{% block title %}Dashboard Admin - Econutri{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div>
+        <h1>Tableau de Bord Administrateur</h1>
+        <div class="subtitle">Bienvenue, {{ app.user.prenom ?? 'Admin' }} {{ app.user.nom ?? '' }}</div>
+    </div>
+    <div class="search-box">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Rechercher...">
+            <button class="btn btn-primary" type="button">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- STATS CARDS -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-lg-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--green-500), var(--forest-500));">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-label">Utilisateurs</div>
+            <div class="stat-value">{{ totalUsers }}</div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--emerald-500), var(--emerald-700));">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="stat-label">Produits</div>
+            <div class="stat-value">{{ totalProducts }}</div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--lime-500), var(--lime-700));">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-label">Commandes</div>
+            <div class="stat-value">{{ totalOrders }}</div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-lg-6 mb-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--mint-500), var(--mint-700));">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="stat-label">Réclamations</div>
+            <div class="stat-value">{{ totalReclamations }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- CHARTS -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="chart-container">
+            <div class="chart-title">
+                <i class="fas fa-chart-bar"></i> Quantités en stock par produit
+            </div>
+            <div class="chart-wrapper" style="position: relative; height: 350px; width: 100%;">
+                <canvas id="quantitiesChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 mb-4">
+        <div class="chart-container">
+            <div class="chart-title">
+                <i class="fas fa-chart-line"></i> Ventes des 7 derniers jours
+            </div>
+            <div class="chart-wrapper" style="position: relative; height: 350px; width: 100%;">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PRODUCT SALES CHART -->
+<div class="row mb-4">
+    <div class="col-lg-12 mb-4">
+        <div class="chart-container">
+            <div class="chart-title">
+                <i class="fas fa-chart-pie"></i> Nombre de produits vendus par produit
+            </div>
+            <div class="chart-wrapper" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="productSalesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ALERTE STOCKS FAIBLES et COMMANDES RÉCENTES -->
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="table-container">
+            <div class="table-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Alerte Stocks Faibles (&lt; 10)</h3>
+                <div class="filter-badge">
+                    <i class="fas fa-filter"></i> Stock faible
+                </div>
+            </div>
+            {% if lowStockProducts|length > 0 %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Catégorie</th>
+                            <th>Stock</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in lowStockProducts %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>
+                                    {% if product.category is defined %}
+                                        {{ product.category.name }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge badge-custom badge-danger">{{ product.stock }}</span>
+                                </td>
+                                <td>
+                                    <a href="{{ path('admin_products') }}#product-{{ product.id }}" class="btn btn-outline-primary btn-sm" title="Gérer le stock">
+                                        <i class="fas fa-edit"></i> Gérer
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                    <p class="text-success fw-bold">Tous les stocks sont suffisants!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-6 mb-4">
+        <div class="table-container">
+            <div class="table-header">
+                <h3><i class="fas fa-shopping-cart"></i> Commandes Récentes</h3>
+                <div class="filter-badge">
+                    <i class="fas fa-calendar"></i> Dernières 5
+                </div>
+            </div>
+            {% if recentOrders|length > 0 %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Client</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recentOrders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>
+                                    {% if order.user is defined %}
+                                        {{ order.user.prenom ?? '' }} {{ order.user.nom ?? '' }}
+                                    {% else %}
+                                        ID: {{ order.userId }}
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ order.totalAmount }} TND</strong></td>
+                                <td>
+                                    {% if order.status == 'pending' %}
+                                        <span class="badge badge-custom" style="background: linear-gradient(135deg, var(--lime-400), var(--lime-600)); color: var(--lime-900);">
+                                            Confirmé
+                                        </span>
+                                    {% elseif order.status == 'confirmed' %}
+                                        <span class="badge badge-custom" style="background: linear-gradient(135deg, var(--green-400), var(--green-600)); color: white;">
+                                            Confirmée
+                                        </span>
+                                    {% elseif order.status == 'delivered' %}
+                                        <span class="badge badge-custom" style="background: linear-gradient(135deg, var(--forest-400), var(--forest-600)); color: white;">
+                                            Livrée
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-custom" style="background: linear-gradient(135deg, var(--emerald-400), var(--emerald-600)); color: white;">
+                                            {{ order.status }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.createdAt|date('d/m/Y H:i') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-shopping-cart text-muted fa-3x mb-3"></i>
+                    <p class="text-muted">Aucune commande récente</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- RÉCLAMATIONS RÉCENTES -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="table-container">
+            <div class="table-header">
+                <h3><i class="fas fa-comments"></i> Réclamations Récentes</h3>
+                <div class="filter-badge">
+                    <i class="fas fa-clock"></i> Non traitées
+                </div>
+            </div>
+            {% if recentReclamations|length > 0 %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Sujet</th>
+                            <th>Message</th>
+                            <th>Date</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reclamation in recentReclamations %}
+                            <tr>
+                                <td>{{ reclamation.nom }}</td>
+                                <td>{{ reclamation.email }}</td>
+                                <td>{{ reclamation.sujet }}</td>
+                                <td>{{ reclamation.message|slice(0, 50) }}...</td>
+                                <td>{{ reclamation.dateCreation|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    {% if reclamation.statut == 'nouveau' %}
+                                        <span class="badge badge-custom" style="background: linear-gradient(135deg, var(--green-400), var(--green-600)); color: white;">
+                                            Nouveau
+                                        </span>
+                                    {% elseif reclamation.statut == 'en_cours' %}
+                                        <span class="badge badge-custom" style="background: linear-gradient(135deg, var(--lime-400), var(--lime-600)); color: var(--lime-900);">
+                                            En cours
+                                        </span>
+                                    {% elseif reclamation.statut == 'resolu' %}
+                                        <span class="badge badge-custom" style="background: linear-gradient(135deg, var(--forest-400), var(--forest-600)); color: white;">
+                                            Résolu
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-custom" style="background: linear-gradient(135deg, var(--emerald-400), var(--emerald-600)); color: white;">
+                                            {{ reclamation.statut }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                    <p class="text-success fw-bold">Aucune réclamation!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Quantités en stock par produit
+    const quantitiesCtx = document.getElementById('quantitiesChart')?.getContext('2d');
+    if (quantitiesCtx) {
+        const productNames = {{ productNames|json_encode|raw }};
+        const productStocks = {{ productStocks|json_encode|raw }};
+        
+        new Chart(quantitiesCtx, {
+            type: 'bar',
+            data: {
+                
+                labels: productNames,
+                datasets: [{
+                    label: 'Stock disponible',
+                    data: productStocks,
+                    backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                    borderColor: '#16a34a',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false,
+                            color: 'rgba(34, 197, 94, 0.1)'
+                        },
+                        ticks: {
+                            color: '#166534',
+                            font: {
+                                weight: '600'
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#166534',
+                            font: {
+                                weight: '600'
+                            },
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Graphique des ventes (données dynamiques de la base de données)
+    const salesCtx = document.getElementById('salesChart')?.getContext('2d');
+    if (salesCtx) {
+        const salesLabels = {{ salesLabels|json_encode|raw }};
+        const salesDataValues = {{ salesData|json_encode|raw }};
+        
+        const gradientLine = salesCtx.createLinearGradient(0, 0, 0, 400);
+        gradientLine.addColorStop(0, 'rgba(34, 197, 94, 0.8)');
+        gradientLine.addColorStop(1, 'rgba(34, 197, 94, 0.1)');
+        
+        new Chart(salesCtx, {
+            type: 'line',
+            data: {
+                labels: salesLabels,
+                datasets: [{
+                    label: 'Ventes (TND)',
+                    data: salesDataValues,
+                    backgroundColor: gradientLine,
+                    borderColor: '#16a34a',
+                    borderWidth: 4,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#22c55e',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 3,
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false,
+                            color: 'rgba(34, 197, 94, 0.1)'
+                        },
+                        ticks: {
+                            color: '#166534',
+                            font: {
+                                weight: '600'
+                            },
+                            callback: function(value) {
+                                return value + ' TND';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#166534',
+                            font: {
+                                weight: '600'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Graphique des ventes par produit
+    const productSalesCtx = document.getElementById('productSalesChart')?.getContext('2d');
+    if (productSalesCtx) {
+        const productNamesForSales = {{ productNames|json_encode|raw }};
+        const productSalesData = {{ productSales|json_encode|raw }};
+        
+        // Générer des couleurs pour chaque produit
+        const colors = [
+            '#22c55e', '#16a34a', '#84cc16', '#65a30d', '#10b981',
+            '#059669', '#14b8a6', '#0d9488', '#06b6d4', '#0284c7',
+            '#3b82f6', '#2563eb', '#6366f1', '#4f46e5', '#8b5cf6'
+        ];
+        
+        new Chart(productSalesCtx, {
+            type: 'bar',
+            data: {
+                labels: productNamesForSales,
+                datasets: [{
+                    label: 'Quantité vendue',
+                    data: productSalesData,
+                    backgroundColor: colors.slice(0, productNamesForSales.length),
+                    borderColor: colors.slice(0, productNamesForSales.length).map(c => c),
+                    borderWidth: 2,
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false,
+                            color: 'rgba(34, 197, 94, 0.1)'
+                        },
+                        ticks: {
+                            color: '#166534',
+                            font: {
+                                weight: '600'
+                            },
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#166534',
+                            font: {
+                                weight: '600'
+                            },
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+
+<style>
+    /* Conteneurs de graphiques avec dimensions fixes */
+    .chart-wrapper {
+        position: relative;
+        width: 100%;
+        height: 350px;
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+    }
+
+    .chart-wrapper canvas {
+        max-height: 350px !important;
+        max-width: 100% !important;
+    }
+
+    /* Empêcher la croissance excessive des graphiques */
+    #quantitiesChart,
+    #salesChart {
+        max-height: 350px !important;
+    }
+
+    /* Media queries pour responsive */
+    @media (max-width: 992px) {
+        .chart-wrapper {
+            height: 300px;
+        }
+        
+        .chart-wrapper canvas {
+            max-height: 300px !important;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .chart-wrapper {
+            height: 250px;
+        }
+        
+        .chart-wrapper canvas {
+            max-height: 250px !important;
+        }
+    }
+</style>
+{% endblock %}

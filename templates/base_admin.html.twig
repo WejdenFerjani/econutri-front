@@ -1,0 +1,915 @@
+{# templates/base_admin.html.twig #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard - Econutri{% endblock %}</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+    :root {
+        --green-50: #f0fdf4;
+        --green-100: #dcfce7;
+        --green-200: #bbf7d0;
+        --green-300: #86efac;
+        --green-400: #4ade80;
+        --green-500: #22c55e;
+        --green-600: #16a34a;
+        --green-700: #15803d;
+        --green-800: #166534;
+        --green-900: #14532d;
+        --green-950: #052e16;
+        --forest-50: #f0f7f2;
+        --forest-100: #d4e8da;
+        --forest-200: #a8d1b5;
+        --forest-300: #7dba90;
+        --forest-400: #51a36b;
+        --forest-500: #368c53;
+        --forest-600: #2b6e42;
+        --forest-700: #205031;
+        --forest-800: #153220;
+        --forest-900: #0a190f;
+        --mint-50: #f0faf6;
+        --mint-100: #d1f5e8;
+        --mint-200: #a3ebd1;
+        --mint-300: #75e1ba;
+        --mint-400: #47d7a3;
+        --mint-500: #19cd8c;
+        --mint-600: #14a470;
+        --mint-700: #0f7b54;
+        --mint-800: #0a5238;
+        --mint-900: #05291c;
+        --olive-50: #f8f9f4;
+        --olive-100: #e9ecdc;
+        --olive-200: #d3d9b9;
+        --olive-300: #bdc696;
+        --olive-400: #a7b373;
+        --olive-500: #91a050;
+        --olive-600: #738040;
+        --olive-700: #566030;
+        --olive-800: #384020;
+        --olive-900: #1b2010;
+        --lime-50: #f7fee7;
+        --lime-100: #ecfccb;
+        --lime-200: #d9f99d;
+        --lime-300: #bef264;
+        --lime-400: #a3e635;
+        --lime-500: #84cc16;
+        --lime-600: #65a30d;
+        --lime-700: #4d7c0f;
+        --lime-800: #3f6212;
+        --lime-900: #365314;
+        --emerald-50: #ecfdf5;
+        --emerald-100: #d1fae5;
+        --emerald-200: #a7f3d0;
+        --emerald-300: #6ee7b7;
+        --emerald-400: #34d399;
+        --emerald-500: #10b981;
+        --emerald-600: #059669;
+        --emerald-700: #047857;
+        --emerald-800: #065f46;
+        --emerald-900: #064e3b;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--green-50);
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+    
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        background: linear-gradient(180deg, var(--forest-800) 0%, var(--forest-900) 100%);
+        color: white;
+        padding: 0;
+        z-index: 1000;
+        box-shadow: 4px 0 15px rgba(6, 78, 29, 0.2);
+        transition: all 0.3s;
+        border-right: 1px solid var(--forest-700);
+    }
+    
+    .sidebar-header {
+        padding: 25px 20px;
+        background: linear-gradient(135deg, var(--forest-700) 0%, var(--forest-800) 100%);
+        border-bottom: 1px solid var(--forest-600);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sidebar-header h3 {
+        font-size: 1.4rem;
+        margin: 0;
+        font-weight: 700;
+        color: white;
+        letter-spacing: 0.5px;
+    }
+    
+    .sidebar-header .logo {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .logo-icon {
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, var(--green-500) 0%, var(--forest-500) 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: white;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+    
+    .logo-text {
+        flex: 1;
+    }
+    
+    .logo-subtitle {
+        font-size: 0.85rem;
+        color: var(--green-300);
+        margin-top: 3px;
+    }
+    
+    .nav-item {
+        margin: 6px 15px;
+        border-radius: 10px;
+        transition: all 0.3s;
+        overflow: hidden;
+    }
+    
+    .nav-item:hover {
+        background: linear-gradient(90deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
+        transform: translateX(5px);
+    }
+    
+    .nav-item.active {
+        background: linear-gradient(90deg, var(--green-500) 0%, var(--forest-500) 100%);
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+    
+    .nav-link {
+        color: rgba(255, 255, 255, 0.85) !important;
+        padding: 16px 20px !important;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-weight: 500;
+    }
+    
+    .nav-link:hover {
+        color: white !important;
+        text-decoration: none;
+    }
+    
+    .nav-link.active {
+        color: white !important;
+        font-weight: 600;
+        background: transparent;
+    }
+    
+    .nav-icon {
+        width: 24px;
+        text-align: center;
+        font-size: 1.2rem;
+        color: var(--green-300);
+    }
+    
+    .nav-link.active .nav-icon {
+        color: white;
+    }
+    
+    .nav-item.active .nav-icon {
+        color: white;
+    }
+    
+    .main-content {
+        margin-left: 280px;
+        padding: 25px;
+        min-height: 100vh;
+        transition: all 0.3s;
+        background-color: var(--green-50);
+    }
+    
+    .content-header {
+        background: linear-gradient(135deg, white 0%, var(--green-50) 100%);
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(6, 78, 29, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid var(--green-200);
+    }
+    
+    .content-header h1 {
+        font-size: 1.9rem;
+        color: var(--forest-800);
+        margin: 0;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--forest-700), var(--green-600));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .content-header .subtitle {
+        color: var(--forest-600);
+        font-size: 1rem;
+        margin-top: 8px;
+    }
+    
+    .search-box {
+        width: 320px;
+    }
+    
+    .search-box .form-control {
+        border: 2px solid var(--green-300);
+        border-radius: 10px;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+    }
+    
+    .search-box .form-control:focus {
+        border-color: var(--green-500);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+    }
+    
+    .search-box .btn {
+        background: linear-gradient(135deg, var(--green-500), var(--forest-500));
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .search-box .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, white 0%, var(--green-50) 100%);
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 4px 20px rgba(6, 78, 29, 0.08);
+        transition: all 0.4s;
+        border: 1px solid var(--green-200);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(6, 78, 29, 0.15);
+        border-color: var(--green-300);
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--green-400), var(--forest-400));
+    }
+    
+    .stat-icon {
+        width: 65px;
+        height: 65px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        color: white;
+        margin-bottom: 20px;
+        box-shadow: 0 6px 15px rgba(34, 197, 94, 0.25);
+    }
+    
+    .stat-value {
+        font-size: 2.4rem;
+        font-weight: 800;
+        color: var(--forest-800);
+        margin: 15px 0;
+        letter-spacing: -0.5px;
+    }
+    
+    .stat-label {
+        color: var(--forest-600);
+        font-size: 1rem;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    
+    .stat-change {
+        font-size: 0.9rem;
+        padding: 4px 12px;
+        border-radius: 20px;
+        display: inline-block;
+    }
+    
+    .chart-container {
+        background: linear-gradient(135deg, white 0%, var(--green-50) 100%);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(6, 78, 29, 0.08);
+        height: 100%;
+        border: 1px solid var(--green-200);
+    }
+    
+    .chart-title {
+        font-size: 1.2rem;
+        color: var(--forest-800);
+        margin-bottom: 25px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .chart-title i {
+        color: var(--green-500);
+        font-size: 1.4rem;
+    }
+    
+    .table-container {
+        background: linear-gradient(135deg, white 0%, var(--green-50) 100%);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(6, 78, 29, 0.08);
+        border: 1px solid var(--green-200);
+    }
+    
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+    
+    .table-header h3 {
+        margin: 0;
+        color: var(--forest-800);
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+    
+    .filter-badge {
+        background: linear-gradient(135deg, var(--green-100), var(--green-50));
+        border: 1px solid var(--green-300);
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        color: var(--forest-700);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .filter-badge i {
+        color: var(--green-500);
+    }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .data-table th {
+        background: linear-gradient(135deg, var(--green-100), var(--green-50));
+        border: none;
+        color: var(--forest-800);
+        font-weight: 700;
+        padding: 18px 16px;
+        border-bottom: 2px solid var(--green-300);
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .data-table td {
+        padding: 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--green-200);
+        color: var(--forest-700);
+        font-weight: 500;
+    }
+    
+    .data-table tr {
+        transition: all 0.3s;
+    }
+    
+    .data-table tr:hover {
+        background-color: var(--green-100);
+        transform: translateX(5px);
+    }
+    
+    .progress-bar-custom {
+        background: linear-gradient(90deg, var(--green-400), var(--forest-400));
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+    }
+    
+    .badge-custom {
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border: 1px solid transparent;
+    }
+    
+    .pagination-custom .page-link {
+        border: none;
+        color: var(--forest-700);
+        margin: 0 4px;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    
+    .pagination-custom .page-link:hover {
+        background: var(--green-100);
+        color: var(--forest-800);
+    }
+    
+    .pagination-custom .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--green-500), var(--forest-500));
+        color: white;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+    
+    @media (max-width: 992px) {
+        .sidebar {
+            width: 250px;
+            transform: translateX(-100%);
+        }
+        
+        .sidebar.active {
+            transform: translateX(0);
+        }
+        
+        .main-content {
+            margin-left: 0;
+            padding: 20px;
+        }
+        
+        .content-header {
+            flex-direction: column;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        .search-box {
+            width: 100%;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 100%;
+            height: auto;
+            position: fixed;
+            bottom: 0;
+            top: auto;
+            left: 0;
+            right: 0;
+            transform: translateY(100%);
+            border-right: none;
+            border-top: 1px solid var(--forest-700);
+        }
+        
+        .sidebar.active {
+            transform: translateY(0);
+        }
+        
+        .sidebar-header {
+            display: none;
+        }
+        
+        .sidebar-content {
+            display: flex;
+            overflow-x: auto;
+            padding: 10px;
+        }
+        
+        .nav {
+            flex-direction: row;
+            width: 100%;
+        }
+        
+        .nav-item {
+            margin: 5px;
+            min-width: 100px;
+        }
+        
+        .nav-link {
+            flex-direction: column;
+            text-align: center;
+            padding: 10px !important;
+            gap: 8px;
+        }
+        
+        .nav-icon {
+            font-size: 1.4rem;
+        }
+        
+        .main-content {
+            padding-bottom: 120px;
+        }
+    }
+    
+    .mobile-toggle {
+        display: none;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1001;
+        background: linear-gradient(135deg, var(--green-500), var(--forest-500));
+        color: white;
+        border: none;
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        font-size: 22px;
+        box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+        transition: all 0.3s;
+    }
+    
+    .mobile-toggle:hover {
+        transform: rotate(90deg);
+    }
+    
+    @media (max-width: 992px) {
+        .mobile-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+    
+    .sidebar-footer {
+        padding: 20px;
+        border-top: 1px solid var(--forest-700);
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        background: rgba(10, 25, 15, 0.3);
+    }
+    
+    .sidebar-footer small {
+        color: var(--green-400);
+        font-size: 0.8rem;
+        line-height: 1.5;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--green-500), var(--forest-500));
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3);
+    }
+    
+    .btn-outline-primary {
+        border: 2px solid var(--green-400);
+        color: var(--forest-700);
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .btn-outline-primary:hover {
+        background: linear-gradient(135deg, var(--green-500), var(--forest-500));
+        border-color: var(--green-500);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .color-indicator {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        margin-right: 12px;
+        border: 2px solid white;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    
+    /* Couleurs pour les badges de statut en nuances de vert */
+    .badge-stock-low { 
+        background: linear-gradient(135deg, var(--lime-400), var(--lime-600)); 
+        color: var(--lime-900); 
+    }
+    .badge-stock-medium { 
+        background: linear-gradient(135deg, var(--emerald-400), var(--emerald-600)); 
+        color: white; 
+    }
+    .badge-stock-good { 
+        background: linear-gradient(135deg, var(--green-400), var(--green-600)); 
+        color: white; 
+    }
+    .badge-stock-full { 
+        background: linear-gradient(135deg, var(--forest-400), var(--forest-600)); 
+        color: white; 
+    }
+    
+    /* Badges pour les compteurs dans la sidebar */
+    .badge-success { 
+        background: linear-gradient(135deg, var(--green-500), var(--forest-500))!important; 
+        color: white!important; 
+        border: none!important;
+    }
+    .badge-warning { 
+        background: linear-gradient(135deg, var(--lime-400), var(--lime-600))!important; 
+        color: var(--lime-900)!important; 
+        border: none!important;
+    }
+    .badge-danger { 
+        background: linear-gradient(135deg, var(--emerald-500), var(--emerald-700))!important; 
+        color: white!important; 
+        border: none!important;
+    }
+    .badge-info { 
+        background: linear-gradient(135deg, var(--mint-400), var(--mint-600))!important; 
+        color: var(--forest-900)!important; 
+        border: none!important;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .stat-card, .chart-container, .table-container {
+        animation: fadeIn 0.6s ease-out;
+    }
+</style>
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <button class="mobile-toggle" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <div>
+                    <h3>Econutri Admin</h3>
+                    <small style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">Tableau de bord</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidebar-content" style="padding: 15px 0;">
+            <ul class="nav flex-column">
+                <li class="nav-item {% if app.request.attributes.get('_route') == 'admin_dashboard' %}active{% endif %}">
+                    <a class="nav-link" href="{{ path('admin_dashboard') }}">
+                        <i class="nav-icon fas fa-home"></i>
+                        <span>Accueil</span>
+                    </a>
+                </li>
+                <li class="nav-item {% if app.request.attributes.get('_route') == 'admin_users' %}active{% endif %}">
+                    <a class="nav-link" href="{{ path('admin_users') }}">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span>Utilisateurs</span>
+                        {% if totalUsers is defined %}
+                        <span class="badge badge-warning ms-auto">{{ totalUsers }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="nav-item {% if app.request.attributes.get('_route') == 'admin_products' %}active{% endif %}">
+                    <a class="nav-link" href="{{ path('admin_products') }}">
+                        <i class="nav-icon fas fa-box"></i>
+                        <span>Produits</span>
+                        {% if totalProducts is defined %}
+                        <span class="badge badge-info ms-auto">{{ totalProducts }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="nav-item {% if app.request.attributes.get('_route') == 'admin_stocks' %}active{% endif %}">
+                    <a class="nav-link" href="{{ path('admin_stocks') }}">
+                        <i class="nav-icon fas fa-warehouse"></i>
+                        <span>Stocks</span>
+                        {% if lowStockProducts is defined %}
+                        <span class="badge badge-success ms-auto">{{ lowStockProducts|length }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="nav-item {% if app.request.attributes.get('_route') == 'admin_alerts' %}active{% endif %}">
+                    <a class="nav-link" href="{{ path('admin_alerts') }}">
+                        <i class="nav-icon fas fa-exclamation-triangle"></i>
+                        <span>Alertes</span>
+                        {% if lowStockProducts is defined %}
+                        <span class="badge badge-danger ms-auto">{{ lowStockProducts|length }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="nav-item {% if app.request.attributes.get('_route') == 'admin_orders' %}active{% endif %}">
+                    <a class="nav-link" href="{{ path('admin_orders') }}">
+                        <i class="nav-icon fas fa-shopping-cart"></i>
+                        <span>Commandes</span>
+                        {% if totalOrders is defined %}
+                        <span class="badge badge-success ms-auto">{{ totalOrders }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="nav-item {% if app.request.attributes.get('_route') == 'admin_reclamations' %}active{% endif %}">
+                    <a class="nav-link" href="{{ path('admin_reclamations') }}">
+                        <i class="nav-icon fas fa-comment-dots"></i>
+                        <span>Réclamations</span>
+                        {% if totalReclamations is defined %}
+                        <span class="badge badge-danger ms-auto">{{ totalReclamations }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 15px;">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('admin_objectifs') }}">
+                        <i class="nav-icon fas fa-bullseye"></i>
+                        <span>Objectifs</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_home') }}">
+                            <i class="nav-icon fas fa-home"></i>
+                        <span>Retour au site</span>
+                    </a>
+                </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_logout') }}">
+                            <i class="nav-icon fas fa-sign-out-alt"></i>
+                            <span>Déconnexion</span>
+                        </a>
+                    </li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+    // Toggle sidebar on mobile
+    document.getElementById('sidebarToggle').addEventListener('click', function() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        
+        sidebar.classList.toggle('active');
+        
+        if (sidebar.classList.contains('active')) {
+            if (window.innerWidth > 768) {
+                mainContent.style.marginLeft = '280px';
+            }
+            this.innerHTML = '<i class="fas fa-times"></i>';
+        } else {
+            if (window.innerWidth > 768) {
+                mainContent.style.marginLeft = '0';
+            }
+            this.innerHTML = '<i class="fas fa-bars"></i>';
+        }
+    });
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const mainContent = document.getElementById('mainContent');
+        
+        if (window.innerWidth <= 992 && 
+            !sidebar.contains(event.target) && 
+            !toggleBtn.contains(event.target) && 
+            sidebar.classList.contains('active')) {
+            
+            sidebar.classList.remove('active');
+            if (window.innerWidth > 768) {
+                mainContent.style.marginLeft = '0';
+            }
+            toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        }
+    });
+    
+    // Initialize Chart.js charts with green theme
+    document.addEventListener('DOMContentLoaded', function() {
+        // Quantities per product chart
+        const quantitiesCtx = document.getElementById('quantitiesChart')?.getContext('2d');
+        if (quantitiesCtx) {
+            const gradient = quantitiesCtx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(34, 197, 94, 0.8)');
+            gradient.addColorStop(1, 'rgba(22, 163, 74, 0.2)');
+            
+            new Chart(quantitiesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Tomates Bio', 'Carottes Bio', 'Pommes Golden', 'Lait Bio', 'Riz Complet'],
+                    datasets: [{
+                        label: 'Quantité en stock',
+                        data: [300, 200, 180, 160, 140],
+                        backgroundColor: gradient,
+                        borderColor: '#16a34a',
+                        borderWidth: 2,
+                        borderRadius: 10,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false,
+                                color: 'rgba(34, 197, 94, 0.1)'
+                            },
+                            ticks: {
+                                color: '#166534',
+                                font: {
+                                    weight: '600'
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#166534',
+                                font: {
+                                    weight: '600'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+    
+    // Update active nav item based on current page
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentPath = window.location.pathname;
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        navLinks.forEach(link => {
+            const linkPath = link.getAttribute('href');
+            if (linkPath && currentPath.includes(linkPath.replace('/', ''))) {
+                link.classList.add('active');
+                link.closest('.nav-item').classList.add('active');
+            }
+        });
+    });
+</script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</html>
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

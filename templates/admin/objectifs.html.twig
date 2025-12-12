@@ -1,0 +1,129 @@
+﻿{% extends 'base_admin.html.twig' %}
+
+{% block title %}Objectifs - Econutri{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div>
+        <h1>Objectifs & KPI</h1>
+        <div class="subtitle">Suivi des ventes et couverture de stock</div>
+    </div>
+    <div>
+        <a href="{{ path('admin_export_objectifs') }}" class="btn btn-success">
+            <i class="fas fa-file-export"></i> Exporter les données
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--green-500), var(--forest-500));">
+                <i class="fas fa-hand-holding-usd"></i>
+            </div>
+            <div class="stat-label">Ventes 30 jours</div>
+            <div class="stat-value">{{ totalSales30 }} TND</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--emerald-500), var(--emerald-700));">
+                <i class="fas fa-receipt"></i>
+            </div>
+            <div class="stat-label">Commandes 30 jours</div>
+            <div class="stat-value">{{ ordersCount30 }}</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, var(--mint-500), var(--mint-700));">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-label">Panier moyen</div>
+            <div class="stat-value">{{ avgOrderValue }} TND</div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+        <div class="table-container">
+            <div class="table-header">
+                <h3><i class="fas fa-trophy"></i> Top 5 produits (30j)</h3>
+                <div class="filter-badge">
+                    <i class="fas fa-calendar"></i> 30 jours
+                </div>
+            </div>
+            {% if topProducts|length > 0 %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Produit</th>
+                            <th>Quantité vendue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in topProducts %}
+                            <tr>
+                                <td style="width: 70px;">
+                                    {% if p.image is defined and p.image %}
+                                        <img src="{{ asset('images/' ~ p.image) }}" alt="{{ p.name }}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                    {% else %}
+                                        <div style="width: 48px; height: 48px; border-radius: 8px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #9ca3af; border: 1px solid #e5e7eb;">
+                                            <i class="fas fa-box"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ p.name }}</td>
+                                <td><strong>{{ p.qty|default(0) }}</strong></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-box-open text-muted fa-3x mb-3"></i>
+                    <p class="text-muted">Aucune vente sur la période.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-6 mb-4">
+        <div class="table-container">
+            <div class="table-header">
+                <h3><i class="fas fa-triangle-exclamation"></i> Produits à réassort</h3>
+                <div class="filter-badge">
+                    <i class="fas fa-calendar"></i> Basé sur 7 jours
+                </div>
+            </div>
+            {% set risky = coverage|filter(c => (c.stock < 10) or (c.sold7 > 0 and c.coverageDays is not null and c.coverageDays < 14)) %}
+            {% if risky|length > 0 %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Stock</th>
+                            <th>Ventes 7j</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in risky %}
+                            <tr>
+                                <td>{{ c.name }}</td>
+                                <td><span class="badge badge-custom badge-danger">{{ c.stock }}</span></td>
+                                <td>{{ c.sold7 }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-circle-check text-success fa-3x mb-3"></i>
+                    <p class="text-success fw-bold">Aucun produit critique pour l'instant.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

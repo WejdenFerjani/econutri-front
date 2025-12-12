@@ -1,0 +1,255 @@
+{% extends "base_admin.html.twig" %}
+
+{% block title %}Alertes de Stock - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-dark">🚨 Alertes de Stock</h1>
+        <span class="badge bg-success fs-6">{{ alertCount }} produit(s) en alerte</span>
+    </div>
+
+    <!-- Carte de statistiques -->
+    {% if alertCount > 0 %}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-success text-uppercase mb-1">
+                        <small class="font-weight-bold">Produits en alerte</small>
+                    </div>
+                    <div class="h3 mb-0 font-weight-bold text-gray-800">{{ alertCount }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-success text-uppercase mb-1">
+                        <small class="font-weight-bold">Stock critique</small>
+                    </div>
+                    <div class="h3 mb-0 font-weight-bold text-gray-800">
+                        {{ criticalCount }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-success text-uppercase mb-1">
+                        <small class="font-weight-bold">Stock total faible</small>
+                    </div>
+                    <div class="h3 mb-0 font-weight-bold text-gray-800">
+                        {{ totalStock }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tableau des produits en alerte -->
+    <div class="card shadow">
+        <div class="card-header bg-gradient-success text-white">
+            <h6 class="m-0 font-weight-bold">📋 Liste des produits avec stock faible</h6>
+        </div>
+        <div class="card-body">
+            {% if lowStockProducts|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Produit</th>
+                            <th>Catégorie</th>
+                            <th>Stock actuel</th>
+                            <th>Prix (TND)</th>
+                            <th>Valeur totale (TND)</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in lowStockProducts %}
+                        <tr>
+                            <td><strong>{{ product.id }}</strong></td>
+                            <td>
+                                <div class="font-weight-bold">{{ product.name }}</div>
+                                <small class="text-muted">{{ product.description|slice(0, 30) }}{% if product.description|length > 30 %}...{% endif %}</small>
+                            </td>
+                            <td>
+                                {% if product.category %}
+                                    <span class="badge bg-secondary">{{ product.category.name }}</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark">Sans catégorie</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar {% if product.stock < 5 %}bg-danger{% elseif product.stock < 10 %}bg-warning{% else %}bg-success{% endif %}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ ((product.stock / 20 * 100) > 100 ? 100 : (product.stock / 20 * 100)) }}%;"
+                                                 aria-valuenow="{{ product.stock }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="20">
+                                                <strong class="text-white">{{ product.stock }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <strong>{{ (product.price / 1000)|number_format(2, '.', ' ') }} TND</strong>
+                            </td>
+                            <td>
+                                <strong class="text-danger">{{ ((product.price / 1000) * product.stock)|number_format(2, '.', ' ') }} TND</strong>
+                            </td>
+                            <td>
+                                {% if product.stock < 5 %}
+                                    <span class="badge bg-danger">🔴 CRITIQUE</span>
+                                {% elseif product.stock < 10 %}
+                                    <span class="badge bg-warning text-dark">🟡 ALERTE</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#editModal" onclick="loadProductData({{ product.id }}, '{{ product.name|escape('js') }}', '{{ product.description|escape('js') }}', {{ product.price / 1000 }}, {{ product.stock }}, {{ product.category.id ?? 'null' }})">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </button>
+                                <button class="btn btn-sm btn-success" onclick="deleteProduct({{ product.id }})">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle"></i> <strong>Excellent !</strong> Tous les produits ont un stock suffisant. Aucune alerte à signaler.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour modifier un produit -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="editModalLabel">Modifier le produit</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="productId">
+                    
+                    <div class="mb-3">
+                        <label for="productName" class="form-label">Nom du produit</label>
+                        <input type="text" class="form-control" id="productName" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="productDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="productDescription" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="productPrice" class="form-label">Prix (TND)</label>
+                        <input type="number" class="form-control" id="productPrice" step="0.01" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="productStock" class="form-label">Stock</label>
+                        <input type="number" class="form-control" id="productStock" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-success" onclick="saveProduct()">Enregistrer les modifications</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function loadProductData(id, name, description, price, stock, categoryId) {
+    document.getElementById('productId').value = id;
+    document.getElementById('productName').value = name;
+    document.getElementById('productDescription').value = description;
+    document.getElementById('productPrice').value = price;
+    document.getElementById('productStock').value = stock;
+}
+
+function saveProduct() {
+    const productId = document.getElementById('productId').value;
+    const name = document.getElementById('productName').value;
+    const description = document.getElementById('productDescription').value;
+    const price = parseFloat(document.getElementById('productPrice').value) * 1000;
+    const stock = parseInt(document.getElementById('productStock').value);
+
+    fetch('/admin/update-product', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            productId: productId,
+            name: name,
+            description: description,
+            price: price,
+            stock: stock
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Produit mis à jour avec succès !');
+            location.reload();
+        } else {
+            alert('Erreur : ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue');
+    });
+}
+
+function deleteProduct(productId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+        fetch('/admin/delete-product', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId: productId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Produit supprimé avec succès !');
+                location.reload();
+            } else {
+                alert('Erreur : ' + data.message);
+            }
+        });
+    }
+}
+</script>
+
+<style>
+    .border-left-success {
+        border-left: 0.25rem solid #28a745 !important;
+    }
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    }
+</style>
+{% endblock %}

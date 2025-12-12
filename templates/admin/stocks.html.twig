@@ -1,0 +1,477 @@
+{# templates/admin/stocks.html.twig #}
+{% extends 'base_admin.html.twig' %}
+
+{% block content %}
+<div class="content-header">
+    <div>
+        <h1>Gestion des Stocks</h1>
+        <p class="text-muted mb-0">Suivi en temps réel des stocks de produits</p>
+    </div>
+    <div class="search-box">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Rechercher un produit...">
+            <button class="btn btn-primary" type="button">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <i class="fas fa-warehouse"></i>
+            </div>
+            <h3 class="stat-value">{{ products|length }}</h3>
+            <p class="stat-label">Total Produits</p>
+            <small class="text-muted">
+                <i class="fas fa-box"></i> Référencés
+            </small>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                <i class="fas fa-boxes"></i>
+            </div>
+            <h3 class="stat-value">{{ products|reduce((carry, p) => carry + p.stock, 0) }}</h3>
+            <p class="stat-label">Unités en stock</p>
+            <small class="text-success">
+                <i class="fas fa-check"></i> Total disponible
+            </small>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);">
+                <i class="fas fa-euro-sign"></i>
+            </div>
+            <h3 class="stat-value">{{ (products|reduce((carry, p) => carry + (p.price * p.stock), 0))|number_format(0, ',', ' ') }} TND</h3>
+            <p class="stat-label">Valeur du stock</p>
+            <small class="text-info">
+                <i class="fas fa-coins"></i> Estimation
+            </small>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="stat-value">{{ products|filter(p => p.stock < 10)|length }}</h3>
+            <p class="stat-label">Stocks bas</p>
+            <small class="text-danger">
+                <i class="fas fa-exclamation-circle"></i> < 10 unités
+            </small>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-4">
+        <div class="chart-container">
+            <div class="chart-title">Quantités par produit</div>
+            <div style="height: 300px;">
+                <canvas id="quantitiesChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="chart-container">
+            <div class="chart-title">Nombre vendu par produit</div>
+            <div style="height: 300px;">
+                <canvas id="soldChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stock Table -->
+<div class="table-container">
+    <div class="table-header">
+        <h3>Détails du stock</h3>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary btn-sm" id="filterBtn">
+                <i class="fas fa-filter me-1"></i> Tous les produits
+            </button>
+            <button class="btn btn-primary btn-sm" id="exportBtn">
+                <i class="fas fa-download me-1"></i> Exporter
+            </button>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Catégorie</th>
+                    <th>Stock</th>
+                    <th>Prix unitaire</th>
+                    <th>Valeur totale</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                {% set stockPercent = (product.stock / 200 * 100)|round %}
+                {% set totalValue = product.price * product.stock %}
+                <tr>
+                    <td><strong>{{ product.id }}</strong></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img src="{{ asset('images/' ~ product.image) }}" 
+                                 alt="{{ product.name }}" 
+                                 class="rounded me-2" 
+                                 style="width: 30px; height: 30px; object-fit: cover;">
+                            {{ product.name }}
+                        </div>
+                    </td>
+                    <td>{{ product.category.name }}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="progress flex-grow-1 me-2" style="height: 8px;">
+                                <div class="progress-bar progress-bar-custom" style="width: {{ stockPercent > 100 ? 100 : stockPercent }}%"></div>
+                            </div>
+                            <strong>{{ product.stock }}</strong>
+                        </div>
+                    </td>
+                    <td>{{ product.price }} TND</td>
+                    <td><strong>{{ totalValue|number_format(2, ',', ' ') }} TND</strong></td>
+                    <td>
+                        {% if product.stock == 0 %}
+                            <span class="badge bg-dark badge-custom">
+                                <i class="fas fa-times-circle me-1"></i> Rupture
+                            </span>
+                        {% elseif product.stock < 10 %}
+                            <span class="badge bg-danger badge-custom">
+                                <i class="fas fa-exclamation-circle me-1"></i> Stock bas
+                            </span>
+                        {% elseif product.stock < 50 %}
+                            <span class="badge bg-warning badge-custom">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Stock moyen
+                            </span>
+                        {% elseif product.stock >= 100 %}
+                            <span class="badge bg-info badge-custom">
+                                <i class="fas fa-warehouse me-1"></i> Stock plein
+                            </span>
+                        {% else %}
+                            <span class="badge bg-success badge-custom">
+                                <i class="fas fa-check-circle me-1"></i> En stock
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" title="Modifier" 
+                                data-product-id="{{ product.id }}"
+                                data-product-name="{{ product.name }}"
+                                data-product-description="{{ product.description }}"
+                                data-product-price="{{ product.price }}"
+                                data-product-stock="{{ product.stock }}"
+                                data-product-category="{{ product.category.name }}"
+                                onclick="editProductFromButton(this)">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">
+                        Aucun produit trouvé
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <div>
+            <span class="text-muted">Total: {{ products|length }} produit(s)</span>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour modifier le produit -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProductModalLabel">Modifier le produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProductForm">
+                    <input type="hidden" id="editProductId">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editProductName" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="editProductName" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editProductCategory" class="form-label">Catégorie</label>
+                            <input type="text" class="form-control" id="editProductCategory" readonly>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editProductDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editProductPrice" class="form-label">Prix (TND)</label>
+                            <input type="number" class="form-control" id="editProductPrice" step="0.01" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editProductStock" class="form-label">Stock</label>
+                            <input type="number" class="form-control" id="editProductStock" required min="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="saveProductChanges()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM chargé, Bootstrap disponible:', typeof bootstrap !== 'undefined');
+});
+
+// Fonction pour éditer le produit depuis le bouton
+function editProductFromButton(button) {
+    try {
+        // Attendre que Bootstrap soit disponible
+        if (typeof bootstrap === 'undefined') {
+            console.error('Bootstrap n\'est pas encore chargé');
+            alert('Bootstrap n\'est pas chargé. Rafraîchissez la page.');
+            return;
+        }
+        
+        const productId = button.getAttribute('data-product-id');
+        const productName = button.getAttribute('data-product-name');
+        const productDescription = button.getAttribute('data-product-description');
+        const productPrice = button.getAttribute('data-product-price');
+        const productStock = button.getAttribute('data-product-stock');
+        const productCategory = button.getAttribute('data-product-category');
+        
+        console.log('Données du produit:', {
+            id: productId,
+            name: productName,
+            description: productDescription,
+            price: productPrice,
+            stock: productStock,
+            category: productCategory
+        });
+        
+        // Vérifier que le modal existe
+        const modalElement = document.getElementById('editProductModal');
+        if (!modalElement) {
+            console.error('Le modal editProductModal n\'existe pas');
+            alert('Erreur: Modal non trouvé');
+            return;
+        }
+        
+        // Remplir les champs
+        document.getElementById('editProductId').value = productId || '';
+        document.getElementById('editProductName').value = productName || '';
+        document.getElementById('editProductDescription').value = productDescription || '';
+        document.getElementById('editProductPrice').value = productPrice || '';
+        document.getElementById('editProductStock').value = productStock || '';
+        document.getElementById('editProductCategory').value = productCategory || '';
+        
+        console.log('Modal va s\'ouvrir');
+        
+        // Ouvrir le modal avec Bootstrap
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        });
+        modal.show();
+        
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue: ' + error.message);
+    }
+}
+
+// Fonction pour sauvegarder les modifications
+function saveProductChanges() {
+    try {
+        const productId = document.getElementById('editProductId').value;
+        const productName = document.getElementById('editProductName').value;
+        const productDescription = document.getElementById('editProductDescription').value;
+        const productPrice = document.getElementById('editProductPrice').value;
+        const productStock = document.getElementById('editProductStock').value;
+        
+        console.log('Données à sauvegarder:', {
+            productId,
+            productName,
+            productDescription,
+            productPrice,
+            productStock
+        });
+        
+        if (!productName || !productDescription || !productPrice || productStock === '') {
+            alert('Veuillez remplir tous les champs');
+            return;
+        }
+        
+        if (productPrice < 0 || productStock < 0) {
+            alert('Le prix et le stock ne peuvent pas être négatifs');
+            return;
+        }
+        
+        fetch('{{ path("admin_update_product") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                productId: productId,
+                name: productName,
+                description: productDescription,
+                price: productPrice,
+                stock: productStock
+            })
+        })
+        .then(response => {
+            console.log('Réponse reçue:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Données reçues:', data);
+            if (data.success) {
+                alert('Produit modifié avec succès');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editProductModal'));
+                modal.hide();
+                location.reload();
+            } else {
+                alert('Erreur: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erreur lors de la requête:', error);
+            alert('Une erreur est survenue: ' + error.message);
+        });
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Une erreur est survenue: ' + error.message);
+    }
+}
+
+// Fonction pour exporter les données
+document.getElementById('exportBtn')?.addEventListener('click', function() {
+    // Créer un CSV des données
+    let csv = 'ID,Nom,Catégorie,Stock,Prix unitaire (TND),Valeur totale (TND),Statut\n';
+    
+    const rows = document.querySelectorAll('.data-table tbody tr');
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length > 1) {
+            const id = cells[0].textContent.trim();
+            const name = cells[1].textContent.trim();
+            const category = cells[2].textContent.trim();
+            const origin = cells[3].textContent.trim();
+            const stock = cells[4].querySelector('strong')?.textContent.trim() || '';
+            const price = cells[5].textContent.trim();
+            const totalValue = cells[6].textContent.trim();
+            const status = cells[7].textContent.trim();
+            
+            csv += `"${id}","${name}","${category}","${origin}","${stock}","${price}","${totalValue}","${status}"\n`;
+        }
+    });
+    
+    // Télécharger le fichier CSV
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'stocks_' + new Date().toISOString().split('T')[0] + '.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
+
+// Fonction pour filtrer les produits
+document.getElementById('filterBtn')?.addEventListener('click', function() {
+    alert('Filtres à implémenter: Stock bas, Stock moyen, Stock plein, etc.');
+});
+
+// Graphique des quantités en stock
+document.addEventListener('DOMContentLoaded', function() {
+    const salesByProduct = {{ salesByProduct|json_encode|raw }};
+    const productNames = {{ productNames|json_encode|raw }};
+    
+    // Créer les tableaux dans le bon ordre
+    const productNamesList = Object.values(productNames);
+    const salesDataList = Object.values(salesByProduct);
+    
+    const soldCtx = document.getElementById('soldChart')?.getContext('2d');
+    if (soldCtx && productNamesList.length > 0) {
+        new Chart(soldCtx, {
+            type: 'bar',
+            data: {
+                labels: productNamesList,
+                datasets: [{
+                    label: 'Nombre vendu',
+                    data: salesDataList,
+                    backgroundColor: 'rgba(255, 193, 7, 0.8)',
+                    borderColor: '#ffc107',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false,
+                            color: 'rgba(255, 193, 7, 0.1)'
+                        },
+                        ticks: {
+                            color: '#f57f17',
+                            font: {
+                                weight: '600'
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#f57f17',
+                            font: {
+                                weight: '600'
+                            },
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category.name }} - EcoNutri</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Notre CSS personnalisé -->
+    <link href="{{ asset('styles/home.css') }}" rel="stylesheet">
+    
+    <style>
+        .products-section {
+            padding: 100px 0 50px;
+            background-color: var(--background-light);
+            min-height: 100vh;
+        }
+        
+        .category-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+        
+        .category-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .category-description {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+            height: 100%;
+            border: none;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .product-card-img {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            object-position: center;
+        }
+        
+        .product-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .product-description {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .product-origin {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        
+        .product-stock {
+            color: var(--text-light);
+        }
+        
+        .stock-badge {
+            background: var(--success-color);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .stock-low {
+            background: var(--warning-color);
+        }
+        
+        .stock-out {
+            background: var(--danger-color);
+        }
+        
+        .btn-add-cart {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-add-cart:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .btn-add-cart:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+        }
+
+        .btn-view-product {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .btn-view-product:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .filters-sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .filter-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 1rem 0;
+        }
+        
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        /* Category Hero with Photo */
+.category-hero {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 3rem;
+    text-align: center;
+}
+
+.category-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.category-hero-title {
+    color: white;
+    font-size: 3.5rem;
+    font-weight: bold;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1rem;
+}
+
+.category-hero-description {
+    color: white;
+    font-size: 1.3rem;
+    opacity: 0.9;
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    margin: 0 auto;
+}
+    </style>
+</head>
+
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ path('app_home') }}">
+                <i class="fas fa-leaf me-2"></i>EcoNutri
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_home') }}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_home') }}#about">À Propos</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" id="productsDropdown" role="button" data-bs-toggle="dropdown">
+                            Produits
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for cat in get_categories() %}
+                                <li><a class="dropdown-item" href="{{ path('app_category', {id: cat.id}) }}">{{ cat.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Conseils</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Réclamation</a>
+                    </li>
+                </ul>
+                
+                <div class="navbar-nav">
+                    {% if app.user %}
+                        <!-- Icône Mon Compte -->
+                        <a class="nav-link" href="{{ path('app_account') }}" title="Mon Compte">
+                            <span class="d-none d-sm-inline">Mon Compte</span>
+                            <i class="fas fa-user-circle fa-lg ms-1"></i>
+                        </a>
+                        <!-- Icône Déconnexion -->
+                        <a class="nav-link" href="{{ path('app_logout') }}" title="Déconnexion">
+                            <span class="d-none d-sm-inline">Déconnexion</span>
+                            <i class="fas fa-sign-out-alt ms-1"></i>
+                        </a>
+                    {% else %}
+                        <a class="nav-link" href="{{ path('app_login') }}">
+                            <i class="fas fa-sign-in-alt me-1"></i>Connexion
+                        </a>
+                        <a class="nav-link" href="{{ path('app_register') }}">
+                            <i class="fas fa-user-plus me-1"></i>Inscription
+                        </a>
+                    {% endif %}
+                    <!-- Icône Panier -->
+                    <a class="nav-link" href="{{ path('app_cart_index') }}" title="Panier">
+                        <span class="d-none d-sm-inline">Panier</span>
+                        <i class="fas fa-shopping-cart ms-1"></i>
+                        <span class="badge bg-success">0</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Category Header -->
+    <section class="category-hero" style="background-image: url('{{ asset('images/category-banner.jpg') }}');">
+    <div class="container">
+        <h1 class="category-hero-title">{{ category.name }}</h1>
+        <p class="category-hero-description">{{ category.description }}</p>
+    </div>
+</section>
+
+    <!-- Products Section -->
+    <section class="products-section">
+        <div class="container">
+            <div class="row">
+                <!-- Sidebar Filters -->
+                <div class="col-lg-3">
+                    <div class="filters-sidebar">
+                        <h5 class="filter-title">Filtrer par</h5>
+                        
+                        <form id="filterForm" method="GET">
+                            <!-- Prix -->
+                            <div class="mb-4">
+                                <h6>Prix</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input price-filter" type="radio" name="priceRange" value="0-5" id="price1">
+                                    <label class="form-check-label" for="price1">Moins de 5 TND</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input price-filter" type="radio" name="priceRange" value="5-10" id="price2">
+                                    <label class="form-check-label" for="price2">5 TND - 10 TND</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input price-filter" type="radio" name="priceRange" value="10-100" id="price3">
+                                    <label class="form-check-label" for="price3">Plus de 10 TND</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Origine filter removed -->
+                            
+                            <!-- Disponibilité -->
+                            <div class="mb-4">
+                                <h6>Disponibilité</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input stock-filter" type="checkbox" name="inStock" value="true" id="inStock">
+                                    <label class="form-check-label" for="inStock">En stock seulement</label>
+                                </div>
+                            </div>
+
+                            <!-- Tri -->
+                            <div class="mb-4">
+                                <h6>Trier par</h6>
+                                <select class="form-select sort-select" name="sort">
+                                    <option value="newest">Nouveautés</option>
+                                    <option value="price_asc">Prix croissant</option>
+                                    <option value="price_desc">Prix décroissant</option>
+                                    <option value="name">Nom A-Z</option>
+                                    <option value="stock">Stock</option>
+                                </select>
+                            </div>
+
+                            <button type="button" id="resetFilters" class="btn btn-outline-secondary w-100">Réinitialiser</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Products Grid -->
+                <div class="col-lg-9">
+                    <!-- Active Filters Display -->
+                    {% set hasActiveFilters = app.request.query.all()|filter((v, k) => k != 'sort' and v != '') is not empty %}
+                    {% if hasActiveFilters %}
+                    <div class="active-filters mb-4">
+                        <h6>Filtres actifs:</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% if app.request.query.get('priceRange') %}
+                                {% set priceRange = app.request.query.get('priceRange') %}
+                                {% if priceRange == '0-5' %}
+                                    <span class="badge bg-primary">Prix: < 5 TND</span>
+                                {% elseif priceRange == '5-10' %}
+                                    <span class="badge bg-primary">Prix: 5-10 TND</span>
+                                {% elseif priceRange == '10-100' %}
+                                    <span class="badge bg-primary">Prix: > 10 TND</span>
+                                {% endif %}
+                            {% endif %}
+                            
+                            {# Origine active badge removed #}
+                            
+                            {% if app.request.query.get('inStock') %}
+                                <span class="badge bg-primary">En stock seulement</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        {% for product in products %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="product-card">
+                                <div class="product-image">
+                                    <img src="{{ asset('images/' ~ product.image) }}" alt="{{ product.name }}" class="product-card-img">
+                                </div>
+                                <h3 class="product-name">{{ product.name }}</h3>
+                                <div class="product-meta">
+                                    <span class="product-origin">{{ product.origin }}</span>
+                                    <span class="product-stock">
+                                        {% if (product.stock|default(0)) > 10 %}
+                                            <span class="stock-badge">En stock</span>
+                                        {% elseif (product.stock|default(0)) > 0 %}
+                                            <span class="stock-badge stock-low">Stock faible</span>
+                                        {% else %}
+                                            <span class="stock-badge stock-out">Rupture</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <p class="product-description">{{ product.description }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="product-price">{{ product.price }} TND</span>
+                                </div>
+                                
+                                <a href="{{ path('app_product', {id: product.id}) }}" class="btn btn-view-product">
+                                    <i class="fas fa-eye me-2"></i>Voir le produit
+                                </a>
+                                
+                                {% if (product.stock|default(0)) > 0 %}
+                                    <form action="{{ path('app_cart_add', {'id': product.id}) }}" method="POST" class="d-inline w-100">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('add_to_cart_' ~ product.id) }}">
+                                        <button type="submit" class="btn btn-add-cart">
+                                            <i class="fas fa-shopping-cart me-2"></i>Ajouter au panier
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <button class="btn btn-add-cart disabled" disabled>
+                                        <i class="fas fa-shopping-cart me-2"></i>Rupture de stock
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12">
+                            <div class="text-center py-5">
+                                <i class="fas fa-seedling fa-3x text-muted mb-3"></i>
+                                <h4 class="text-muted">Aucun produit trouvé</h4>
+                                <p class="text-muted">
+                                    {% if hasActiveFilters %}
+                                        Aucun produit ne correspond à vos critères de filtrage.
+                                    {% else %}
+                                        Aucun produit trouvé dans cette catégorie.
+                                    {% endif %}
+                                </p>
+                                {% if hasActiveFilters %}
+                                    <a href="{{ path('app_category', {id: category.id}) }}" class="btn btn-primary">Voir tous les produits</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center">
+            <p>&copy; 2024 EcoNutri. Tous droits réservés.</p>
+            <div class="mt-3">
+                <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-white me-3"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Filter JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterForm = document.getElementById('filterForm');
+        const resetButton = document.getElementById('resetFilters');
+        
+        // Auto-submit form when filters change
+        const filterInputs = document.querySelectorAll('.price-filter, .stock-filter, .sort-select');
+        filterInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                filterForm.submit();
+            });
+        });
+        
+        // Reset filters
+        resetButton.addEventListener('click', function() {
+            window.location.href = window.location.pathname;
+        });
+        
+        // Set current filter values from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Set price range
+        const priceRange = urlParams.get('priceRange');
+        if (priceRange) {
+            const priceRadio = document.querySelector(`input[name="priceRange"][value="${priceRange}"]`);
+            if (priceRadio) {
+                priceRadio.checked = true;
+            }
+        }
+        
+        // Origine filter removed; no client-side origin restore
+        
+        // Set stock
+        const inStock = urlParams.get('inStock');
+        if (inStock) {
+            document.querySelector('input[name="inStock"]').checked = true;
+        }
+        
+        // Set sort
+        const sort = urlParams.get('sort');
+        if (sort) {
+            const sortSelect = document.querySelector('select[name="sort"]');
+            if (sortSelect) {
+                sortSelect.value = sort;
+            }
+        }
+    });
+    </script>
+</body>
+
+
+</html>

@@ -1,0 +1,177 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription - Econutri{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/registration.css') }}">
+    <style>
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+        }
+
+        .alert {
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            margin-bottom: 15px;
+            border: none;
+            padding: 15px 20px;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .btn-close {
+            padding: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<!-- Flash messages -->
+<div class="flash-messages">
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Succès !</strong> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+    
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Erreur !</strong> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+</div>
+
+<div class="registration-container">
+    <div class="registration-card">
+        <div class="registration-header">
+            <h1>Rejoignez Econutri</h1>
+            <p>Créez votre compte</p>
+        </div>
+        
+        <div class="registration-body">
+            {{ form_start(registrationForm, {'attr': {'class': 'registration-form', 'id': 'registration-form','data-turbo': 'false'}}) }}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(registrationForm.nom, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.nom, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(registrationForm.nom) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(registrationForm.prenom, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.prenom, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(registrationForm.prenom) }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(registrationForm.email) }}
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form_label(registrationForm.genre, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.genre, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(registrationForm.genre) }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form_label(registrationForm.taille, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.taille, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 175'}}) }}
+                            {{ form_errors(registrationForm.taille) }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ form_label(registrationForm.poids, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.poids, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 70.5'}}) }}
+                            {{ form_errors(registrationForm.poids) }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(registrationForm.telephone, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(registrationForm.telephone, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(registrationForm.telephone) }}
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(registrationForm.adresse, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(registrationForm.adresse, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                    {{ form_errors(registrationForm.adresse) }}
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(registrationForm.objectif, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(registrationForm.objectif, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(registrationForm.objectif) }}
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(registrationForm.mot_de_passe, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.mot_de_passe, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(registrationForm.mot_de_passe) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {{ form_label(registrationForm.confirmer_mot_de_passe, null, {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.confirmer_mot_de_passe, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(registrationForm.confirmer_mot_de_passe) }}
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-register" id="register-btn">
+                    Créer mon compte
+                </button>
+            {{ form_end(registrationForm) }}
+            
+            <div class="login-link">
+                <p>Déjà un compte ? <a href="{{ path('app_login') }}">Connectez-vous ici</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Animation du bouton
+document.getElementById('registration-form').addEventListener('submit', function() {
+    const btn = document.getElementById('register-btn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+});
+</script>
+{% endblock %}

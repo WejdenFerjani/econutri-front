@@ -1,0 +1,372 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Passer la Commande - EcoNutri{% endblock %}
+
+{% block body %}
+<section class="order-hero" style="background-image: url('{{ asset('images/order-banner.jpg') }}');">
+    <div class="container">
+        <h1 class="order-hero-title">Passer la Commande</h1>
+    </div>
+</section>
+
+
+        <div class="container">
+
+    <div class="row">
+        <!-- Informations Client -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Informations Client</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nom Client:</strong></p>
+                    <p>{{ user.nom }} {{ user.prenom }}</p>
+                    <p><strong>Email Client:</strong></p>
+                    <p>{{ user.email }}</p>
+                    <p><strong>Numéro Client:</strong></p>
+                    <p>{{ user.telephone }}</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Adresse de Livraison</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ path('app_order_confirm') }}">
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Adresse</label>
+                            <textarea name="address" id="address" class="form-control" rows="3" required>{{ user.adresse }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="city" class="form-label">Ville</label>
+                            <input type="text" name="city" id="city" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="zipcode" class="form-label">Code Postal</label>
+                            <input type="text" name="zipcode" id="zipcode" class="form-control" required>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-success btn-lg w-100">Confirmer la Commande</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résumé Commande -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Total de la Commande</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Récapitulatif des Produits:</h6>
+                        <div class="list-group">
+                            {% for item in cartItems %}
+                            <div class="list-group-item d-flex justify-content-between">
+                                <span>{{ item.product.name }} x {{ item.quantity }}</span>
+                                <span>{{ (item.product.price * item.quantity)|number_format(2, '.', ',') }} TND</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between">
+                            <span>Sous Commande:</span>
+                            <span>{{ subtotal }} TND</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Frais de Livraison:</span>
+                            <span>{{ shippingCost }} TND</span>
+                        </div>
+                    </div>
+
+                    <hr class="border-2">
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between fw-bold fs-5">
+                            <span>Total (TND):</span>
+                            <span>{{ total }} TND</span>
+                        </div>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                        <label class="form-check-label" for="terms">
+                            Payer à la Livraison
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ path('app_cart_index') }}" class="btn btn-secondary btn-lg">Retour au Panier</a>
+    </div>
+</div>
+
+<style>
+/* Order Hero Section */
+.order-hero {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 3rem;
+}
+
+.order-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.order-hero-title {
+    color: white;
+    font-size: 3.5rem;
+    font-weight: bold;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+/* Modern Cards with Shadows */
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    background: white;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #6ba75c, #4a8c3a);
+    color: white;
+    border: none;
+    padding: 1.5rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.card-header.bg-success {
+    background: linear-gradient(135deg, #6ba75c, #4a8c3a) !important;
+}
+
+.card-body {
+    padding: 2rem;
+    background: white;
+}
+
+/* Modern Form Styling */
+.form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+}
+
+.form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+}
+
+.form-control:focus {
+    border-color: #6ba75c;
+    box-shadow: 0 0 0 3px rgba(107, 167, 92, 0.1);
+    background: white;
+    transform: translateY(-2px);
+}
+
+/* Modern List Group */
+.list-group {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1.25rem 1.5rem;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+    background: #f7fafc;
+    transform: translateX(5px);
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+/* Modern Buttons */
+.btn-success {
+    background: linear-gradient(135deg, #6ba75c, #4a8c3a);
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(107, 167, 92, 0.3);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #5a9048, #3a7c2a);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(107, 167, 92, 0.4);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #718096, #4a5568);
+    border: none;
+    border-radius: 12px;
+    padding: 0.875rem 1.75rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(113, 128, 150, 0.3);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #4a5568, #2d3748);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(113, 128, 150, 0.4);
+}
+
+/* Modern Checkbox */
+.form-check-input {
+    width: 1.2em;
+    height: 1.2em;
+    border: 2px solid #cbd5e0;
+    border-radius: 6px;
+    margin-right: 0.75rem;
+}
+
+.form-check-input:checked {
+    background-color: #6ba75c;
+    border-color: #6ba75c;
+    box-shadow: 0 0 0 2px rgba(107, 167, 92, 0.2);
+}
+
+.form-check-label {
+    font-weight: 500;
+    color: #4a5568;
+}
+
+/* Modern Text Styling */
+.card-body p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.card-body strong {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+/* Modern Table Styling */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.table th {
+    background: linear-gradient(135deg, #6ba75c, #4a8c3a);
+    color: white;
+    border: none;
+    padding: 1.25rem;
+    font-weight: 600;
+}
+
+.table td {
+    padding: 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: white;
+}
+
+.table tbody tr:hover {
+    background: #f7fafc;
+}
+
+/* Modern HR Styling */
+hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+    margin: 2rem 0;
+}
+
+hr.border-2 {
+    height: 3px;
+    background: linear-gradient(90deg, #6ba75c, #4a8c3a, #6ba75c);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .order-hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .order-hero {
+        height: 300px;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .card-header {
+        padding: 1.25rem;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .order-hero-title {
+        font-size: 2rem;
+    }
+    
+    .order-hero {
+        height: 250px;
+    }
+    
+    .btn-success, .btn-secondary {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+}
+</style>
+
+{% endblock %}
