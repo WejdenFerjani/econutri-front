@@ -2,8 +2,3 @@ when@dev:
     _errors:
         resource: '@FrameworkBundle/Resources/config/routing/errors.xml'
         prefix: /_error
-
-# Expose AssetMapper routes to serve /assets/* in all environments
-asset_mapper:
-    resource: '@FrameworkBundle/Resources/config/routing/assets.xml'
-    prefix: /assets
