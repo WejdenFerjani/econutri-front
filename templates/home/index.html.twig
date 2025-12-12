@@ -31,6 +31,16 @@
             // Gestion du formulaire diabète 
             const diabetesForm = document.getElementById('diabetes-form');
             if (diabetesForm) {
+                // Déterminer l'URL de l'API en fonction de l'environnement
+                const getBackendUrl = () => {
+                    const hostname = window.location.hostname;
+                    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('127.0.0.1:8000')) {
+                        return 'http://localhost:5000/predict';
+                    } else {
+                        return 'https://econutri-back-production.up.railway.app/predict';
+                    }
+                };
+                
                 diabetesForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
                     
@@ -54,8 +64,8 @@
                     };
 
                     try {
-                        // Appeler l'API Flask
-                        const response = await fetch('http://localhost:5000/predict', {
+                        // Appeler l'API Flask (URL dynamique selon l'environnement)
+                        const response = await fetch(getBackendUrl(), {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
