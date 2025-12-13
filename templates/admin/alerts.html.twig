@@ -194,7 +194,7 @@ function saveProduct() {
     const price = parseFloat(document.getElementById('productPrice').value) * 1000;
     const stock = parseInt(document.getElementById('productStock').value);
 
-    fetch('/admin/update-product', {
+    fetch('{{ path('admin_update_product') }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -224,7 +224,7 @@ function saveProduct() {
 
 function deleteProduct(productId) {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-        fetch('/admin/delete-product', {
+        fetch('{{ path('admin_delete_product') }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
